@@ -16,7 +16,6 @@ socket.onmessage = (message) => {
     .appendChild(document.createElement("p")).innerHTML = message.data;
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
-  //notificação
 };
 
 socket.onclose = () => {

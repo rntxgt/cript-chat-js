@@ -22,8 +22,6 @@ console.log(
 
 wss.on("connection", (ws) => {
   ws.on("message", (message) => {
-    console.log("Recebido:", message.toString());
-
     // Broadcast: Envia a mensagem para todos os clientes conectados
     wss.clients.forEach((client) => {
       // Verifica se o cliente está com a conexão aberta antes de enviar
