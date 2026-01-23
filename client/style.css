@@ -17,9 +17,21 @@ section {
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.541); /*Sombra*/
 }
 
-div select#chatBox {
-  width: 100%;
-  scroll-behavior: smooth;
+div#chatBox {
+  background-color: white; /*Cor de fundo*/
+  width: 100%; /*Largura*/
+  border-radius: 10px; /*arredonda as bordas*/
+  text-align: left; /*Alinha o texto a esquerda*/
+  overflow-y: auto; /*Permite rolar a caixa de chat*/
+  color: #121212; /*Cor do texto*/
+  border: 1px solid #ccc; /*Borda*/
+  height: 300px; /*Altura*/
+}
+
+div#chatBox p {
+  color: black;
+  padding-left: 10px;
+  font-size: 12.5px;
 }
 
 textarea#mensagem {
@@ -27,6 +39,7 @@ textarea#mensagem {
   resize: none;
   padding: 8px; /* Espaçamento interno para o texto não colar na borda */
   box-sizing: border-box; /* Garante que o padding não aumente o tamanho total */
+  font-size: 12.5px;
 }
 
 div#inputBox {

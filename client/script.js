@@ -21,8 +21,8 @@ socket.onmessage = (message) => {
 socket.onclose = () => {
   document
     .getElementById("chatBox")
-    .appendChild(document.createElement("option")).innerText =
-    "Conexão com o servidor perdida. Por favor, tente novamente mais tarde";
+    .appendChild(document.createElement("p")).innerText =
+    `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`;
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 };
