@@ -30,7 +30,7 @@ socket.onclose = () => {
 function sendMessage() {
   if (
     document.getElementById("mensagem").value == "" ||
-    document.getElementById("mensagem").value.length > 200
+    document.getElementById("mensagem").value.length >= 280
   ) {
     alert("[ERRO] Digite uma mensagem válida!");
     document.getElementById("mensagem").focus();
