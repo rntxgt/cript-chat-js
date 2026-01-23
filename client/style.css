@@ -19,6 +19,7 @@ section {
 
 div select#chatBox {
   width: 100%;
+  scroll-behavior: smooth;
 }
 
 textarea#mensagem {
