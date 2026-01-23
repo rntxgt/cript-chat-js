@@ -18,6 +18,15 @@ socket.onmessage = (message) => {
     document.getElementById("chatBox").scrollHeight;
 };
 
+socket.onclose = () => {
+  document
+    .getElementById("chatBox")
+    .appendChild(document.createElement("option")).innerText =
+    "Conexão com o servidor perdida. Por favor, tente novamente mais tarde";
+  document.getElementById("chatBox").scrollTop =
+    document.getElementById("chatBox").scrollHeight;
+};
+
 function sendMessage() {
   if (
     document.getElementById("mensagem").value == "" ||
@@ -25,9 +34,9 @@ function sendMessage() {
   ) {
     alert("[ERRO] Digite uma mensagem válida!");
     document.getElementById("mensagem").focus();
-    return;
+  } else {
+    socket.send(nome + ": " + document.getElementById("mensagem").value);
+    document.getElementById("mensagem").value = "";
+    document.getElementById("mensagem").focus();
   }
-  socket.send(nome + ": " + document.getElementById("mensagem").value);
-  document.getElementById("mensagem").value = "";
-  document.getElementById("mensagem").focus();
 }
