@@ -1,11 +1,10 @@
 const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
-const socket = new WebSocket(`ws://${localIp}:8080`);
-
-if (nome == null) {
+if (nome == "" || nome == null) {
   alert("[ERRO] Nome inválido!");
   location.reload();
 }
+const socket = new WebSocket(`ws://${localIp}:8080`);
 
 socket.onopen = () => {
   socket.send(`${nome} entrou`);
@@ -14,7 +13,10 @@ socket.onopen = () => {
 socket.onmessage = (message) => {
   document
     .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerText = message.data;
+    .appendChild(document.createElement("p")).innerHTML = message.data;
+  document.getElementById("chatBox").scrollTop =
+    document.getElementById("chatBox").scrollHeight;
+  //notificação
 };
 
 socket.onclose = () => {
@@ -34,7 +36,9 @@ function sendMessage() {
     alert("[ERRO] Digite uma mensagem válida!");
     document.getElementById("mensagem").focus();
   } else {
-    socket.send(nome + ": " + document.getElementById("mensagem").value);
+    socket.send(
+      "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+    );
     document.getElementById("mensagem").value = "";
     document.getElementById("mensagem").focus();
   }

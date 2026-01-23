@@ -9,12 +9,11 @@ header {
 }
 
 section {
-  background-color: rgb(235, 226, 153);
+  background-color: darkgray;
   border-radius: 10px; /*arredonda as bordas*/
   padding: 15px; /*Epaçamento interno*/
   width: 500px; /*Largura*/
   margin: auto; /*Centraliza o elemento*/
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.541); /*Sombra*/
 }
 
 article#chatBox {
@@ -25,7 +24,9 @@ article#chatBox {
   overflow-y: auto; /*Permite rolar a caixa de chat*/
   color: #121212; /*Cor do texto*/
   border: 1px solid #ccc; /*Borda*/
-  height: 300px; /*Altura*/
+  height: 400px; /*Altura*/
+  scroll-behavior: smooth;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
 article#chatBox p {
