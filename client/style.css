@@ -31,7 +31,9 @@ div#chatBox {
 div#chatBox p {
   color: black;
   padding-left: 10px;
+  padding-right: 10px;
   font-size: 12.5px;
+  word-break: break-word;
 }
 
 textarea#mensagem {
