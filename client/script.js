@@ -13,9 +13,7 @@ socket.onopen = () => {
 socket.onmessage = (message) => {
   document
     .getElementById("chatBox")
-    .appendChild(document.createElement("option")).innerText = message.data;
-  document.getElementById("chatBox").scrollTop =
-    document.getElementById("chatBox").scrollHeight;
+    .appendChild(document.createElement("p")).innerText = message.data;
 };
 
 socket.onclose = () => {
