@@ -1,13 +1,28 @@
 const WebSocket = require("ws");
-// Cria um servidor na porta 8080
-const wss = new WebSocket.Server({ port: 8080 });
+const os = require("os");
 
-console.log("Servidor rodando na porta 8080...");
+function getLocalIp() {
+  return (
+    Object.values(os.networkInterfaces())
+      .flat()
+      .find((iface) => iface.family === "IPv4" && !iface.internal)?.address ||
+    console.error("Nenhum endereço IP encontrado")
+  );
+}
+
+// Cria um servidor na porta 8080
+const wss = new WebSocket.Server({
+  port: 8080,
+  host: getLocalIp(),
+});
+
+console.log(
+  `Servidor WebSocket rodando em ws://${getLocalIp()}:${wss.options.port}`,
+);
 
 wss.on("connection", (ws) => {
-  // Evento: quando chega mensagem do cliente
   ws.on("message", (message) => {
-    console.log("Recebido:", message.toString()); //temporário para testes
+    console.log("Recebido:", message.toString());
 
     // Broadcast: Envia a mensagem para todos os clientes conectados
     wss.clients.forEach((client) => {

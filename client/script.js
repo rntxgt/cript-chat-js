@@ -1,5 +1,6 @@
-const socket = new WebSocket("ws://localhost:8080");
+const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
+const socket = new WebSocket(`ws://${localIp}:8080`);
 
 if (nome == null) {
   alert("[ERRO] Nome inválido!");
