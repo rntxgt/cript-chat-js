@@ -17,7 +17,7 @@ section {
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.541); /*Sombra*/
 }
 
-div#chatBox {
+article#chatBox {
   background-color: white; /*Cor de fundo*/
   width: 100%; /*Largura*/
   border-radius: 10px; /*arredonda as bordas*/
@@ -28,7 +28,7 @@ div#chatBox {
   height: 300px; /*Altura*/
 }
 
-div#chatBox p {
+article#chatBox p {
   color: black;
   padding-left: 10px;
   padding-right: 10px;
