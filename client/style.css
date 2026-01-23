@@ -2,15 +2,43 @@ body {
   background-color: #121212;
   color: #e0e0e0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header {
   text-align: center;
 }
 
-section#principal {
-  text-align: center;
+section {
   background-color: rgb(235, 226, 153);
   border-radius: 10px; /*arredonda as bordas*/
   padding: 15px; /*Epaçamento interno*/
-  width: 250px; /*Largura*/
+  width: 500px; /*Largura*/
   margin: auto; /*Centraliza o elemento*/
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.541); /*Sombra*/
+}
+
+div select#chatBox {
+  width: 100%;
+}
+
+textarea#mensagem {
+  width: 100%; /* Ocupa a largura total do container */
+  resize: none;
+  padding: 8px; /* Espaçamento interno para o texto não colar na borda */
+  box-sizing: border-box; /* Garante que o padding não aumente o tamanho total */
+}
+
+div#inputBox {
+  margin-top: 10px;
+  display: flex; /* Ativa o modo flexível */
+  align-items: center; /* Alinha o botão verticalmente ao centro da textarea */
+  gap: 10px;
+}
+
+button#enviar {
+  padding: 13.5px;
+}
+
+footer {
+  text-align: center;
 }
