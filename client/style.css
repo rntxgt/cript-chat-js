@@ -32,12 +32,12 @@ textarea#mensagem {
 div#inputBox {
   margin-top: 10px;
   display: flex; /* Ativa o modo flexível */
-  align-items: center; /* Alinha o botão verticalmente ao centro da textarea */
+  align-items: stretch; /* Estica os itens para ocupar a altura total */
   gap: 10px;
 }
 
 button#enviar {
-  padding: 13.5px;
+  cursor: pointer;
 }
 
 footer {
