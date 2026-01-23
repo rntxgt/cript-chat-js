@@ -1,12 +1,19 @@
-// Usa a API nativa do navegador
 const socket = new WebSocket("ws://localhost:8080");
 const nome = prompt("Insira seu nome: ");
 
-// Quando recebe mensagem
+socket.onopen = () => {
+  socket.send(`${nome} entrou`);
+};
+
 socket.onmessage = (message) => {
+  document
+    .getElementById("chatBox")
+    .appendChild(document.createElement("option")).innerText = message.data;
   console.log(message.data);
 };
 
-function sendMessage(message) {
-  socket.send(nome + ": " + message);
+function sendMessage() {
+  socket.send(nome + ": " + document.getElementById("mensagem").value);
+  document.getElementById("mensagem").value = "";
+  document.getElementById("mensagem").focus();
 }

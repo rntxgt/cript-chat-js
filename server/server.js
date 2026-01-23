@@ -5,11 +5,9 @@ const wss = new WebSocket.Server({ port: 8080 });
 console.log("Servidor rodando na porta 8080...");
 
 wss.on("connection", (ws) => {
-  console.log(`Cliente conectou!`);
-
   // Evento: quando chega mensagem do cliente
   ws.on("message", (message) => {
-    console.log("Recebido:", message.toString());
+    console.log("Recebido:", message.toString()); //temporário para testes
 
     // Broadcast: Envia a mensagem para todos os clientes conectados
     wss.clients.forEach((client) => {
@@ -21,5 +19,5 @@ wss.on("connection", (ws) => {
   });
 
   // Envia uma mensagem de boas-vindas assim que conecta
-  ws.send("Bem-vindo ao servidor do CriptChat!");
+  ws.send("Bem-vindo ao Cript-Chat!");
 });

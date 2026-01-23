@@ -4,18 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Cript Chat</title>
+    <title>Cript-Chat</title>
   </head>
-  <body>
+  <body onload="document.getElementById('mensagem').focus()">
     <header>
-      <h1>Cript Chat</h1>
+      <h1>Cript-Chat</h1>
     </header>
     <main>
       <section>
         <div>
-          <select name="chatBox" id="chatBox" size="10">
-            <option>Olá</option>
-          </select>
+          <select name="chatBox" id="chatBox" size="10"></select>
         </div>
         <div id="inputBox">
           <textarea
@@ -23,13 +21,19 @@
             name="mensagem"
             id="mensagem"
             placeholder="Digite sua mensagem"
+            onkeydown="
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+              }
+            "
           ></textarea>
-          <button id="enviar">Enviar</button>
+          <button id="enviar" onclick="sendMessage()">Enviar</button>
         </div>
       </section>
     </main>
     <footer>
-      <p>@2026 Cript Chat</p>
+      <p>&copy;2026 Cript-Chat</p>
     </footer>
     <script src="script.js"></script>
   </body>
