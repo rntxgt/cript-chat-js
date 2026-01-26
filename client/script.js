@@ -1,7 +1,10 @@
 const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
-if (nome == "" || nome == null) {
-  alert("[ERRO] Nome inválido!");
+let key = prompt("Insira a chave: ");
+key += "2yCH5xqdCU7ja0dE";
+
+if (nome == "" || nome == null || key == "" || key == null) {
+  alert("[ERRO] Nome ou chave inválidos!");
   location.reload();
 }
 
@@ -42,3 +45,28 @@ function writeChatBox(messageChatBox) {
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 }
+
+// gera hash da chave
+
+async function hash(key) {
+  return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+}
+
+// gera a chave
+
+async function makeKey(hashBuffer) {
+  return await crypto.subtle.importKey("raw", hashBuffer, "AES-GCM", false, [
+    "encrypt",
+    "decrypt",
+  ]);
+}
+
+// somente testa a chave
+
+hash(key)
+  .then((hashBuffer) => {
+    return makeKey(hashBuffer);
+  })
+  .then((cryptoKey) => {
+    console.log(cryptoKey);
+  });
