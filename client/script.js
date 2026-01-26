@@ -4,28 +4,20 @@ if (nome == "" || nome == null) {
   alert("[ERRO] Nome inválido!");
   location.reload();
 }
+
 const socket = new WebSocket(`ws://${localIp}:8080`);
 
 socket.onopen = () => {
+  writeChatBox("Bem-vindo ao Cript-Chat!");
   socket.send(`${nome} entrou`);
 };
 
-socket.onmessage = (message) => {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = message.data;
-  document.getElementById("chatBox").scrollTop =
-    document.getElementById("chatBox").scrollHeight;
-};
+socket.onmessage = (message) => writeChatBox(message.data);
 
-socket.onclose = () => {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerText =
-    `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`;
-  document.getElementById("chatBox").scrollTop =
-    document.getElementById("chatBox").scrollHeight;
-};
+socket.onclose = () =>
+  writeChatBox(
+    `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
+  );
 
 function sendMessage() {
   if (
@@ -41,4 +33,12 @@ function sendMessage() {
     document.getElementById("mensagem").value = "";
     document.getElementById("mensagem").focus();
   }
+}
+
+function writeChatBox(messageChatBox) {
+  document
+    .getElementById("chatBox")
+    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
+  document.getElementById("chatBox").scrollTop =
+    document.getElementById("chatBox").scrollHeight;
 }
