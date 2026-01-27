@@ -2,31 +2,32 @@ const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
 let key = prompt("Insira a chave: ");
 key += "2yCH5xqdCU7ja0dE";
+const iv = window.crypto.getRandomValues(new Uint8Array(12));
 
-// permissão de notificação
-if (window.Notification && Notification.permission === "default") {
-  Notification.requestPermission();
-}
-
-if (nome == "" || nome == null || key == "" || key == null) {
+if (!nome || !key) {
   alert("[ERRO] Nome ou chave inválidos!");
   location.reload();
 }
 
-const socket = new WebSocket(`ws://${localIp}:8080`);
+if (window.Notification && Notification.permission === "default") {
+  Notification.requestPermission();
+}
 
-socket.onopen = () => {
+const socket = new WebSocket(`ws://${localIp}:8080`);
+socket.binaryType = "arraybuffer";
+
+socket.onopen = async () => {
   writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(`${nome} entrou`);
+  socket.send(await encrypt(`${nome} entrou`));
 };
 
-socket.onmessage = (message) => {
-  writeChatBox(message.data);
+socket.onmessage = async (message) => {
+  let msg;
+  writeChatBox((msg = await decrypt(message.data)));
 
-  // notificação
   if (Notification.permission === "granted" && document.hidden) {
     new Notification("Nova mensagem no Cript-Chat", {
-      body: message.data.replace("<b>", "").replace("</b>", ""),
+      body: msg.replace("<b>", "").replace("</b>", ""),
     });
   }
 };
@@ -36,7 +37,7 @@ socket.onclose = () =>
     `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
   );
 
-function sendMessage() {
+async function sendMessage() {
   if (
     document.getElementById("mensagem").value == "" ||
     document.getElementById("mensagem").value.length >= 500
@@ -45,7 +46,9 @@ function sendMessage() {
     document.getElementById("mensagem").focus();
   } else {
     socket.send(
-      "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+      await encrypt(
+        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+      ),
     );
     document.getElementById("mensagem").value = "";
     document.getElementById("mensagem").focus();
@@ -61,26 +64,34 @@ function writeChatBox(messageChatBox) {
 }
 
 // gera hash da chave
-
-async function hash(key) {
+async function hash() {
   return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
 }
 
 // gera a chave
-
-async function makeKey(hashBuffer) {
-  return await crypto.subtle.importKey("raw", hashBuffer, "AES-GCM", false, [
+async function cryptoKey() {
+  return await crypto.subtle.importKey("raw", await hash(), "AES-GCM", false, [
     "encrypt",
     "decrypt",
   ]);
 }
 
-// somente testa a chave
+// criptografa a mensagem
+async function encrypt(msg) {
+  return await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    await cryptoKey(),
+    new TextEncoder().encode(msg),
+  );
+}
 
-hash(key)
-  .then((hashBuffer) => {
-    return makeKey(hashBuffer);
-  })
-  .then((cryptoKey) => {
-    console.log(cryptoKey);
-  });
+// descriptografa a mensagem
+async function decrypt(msg) {
+  return new TextDecoder().decode(
+    await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      await cryptoKey(),
+      msg,
+    ),
+  );
+}
