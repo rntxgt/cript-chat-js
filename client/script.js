@@ -3,6 +3,11 @@ const nome = prompt("Insira seu nome: ");
 let key = prompt("Insira a chave: ");
 key += "2yCH5xqdCU7ja0dE";
 
+// permissão de notificação
+if (window.Notification && Notification.permission === "default") {
+  Notification.requestPermission();
+}
+
 if (nome == "" || nome == null || key == "" || key == null) {
   alert("[ERRO] Nome ou chave inválidos!");
   location.reload();
@@ -15,7 +20,16 @@ socket.onopen = () => {
   socket.send(`${nome} entrou`);
 };
 
-socket.onmessage = (message) => writeChatBox(message.data);
+socket.onmessage = (message) => {
+  writeChatBox(message.data);
+
+  // notificação
+  if (Notification.permission === "granted" && document.hidden) {
+    new Notification("Nova mensagem no Cript-Chat", {
+      body: message.data.replace("<b>", "").replace("</b>", ""),
+    });
+  }
+};
 
 socket.onclose = () =>
   writeChatBox(
