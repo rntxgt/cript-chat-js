@@ -9,28 +9,28 @@ header {
 }
 
 section {
-  background-color: darkgray;
+  background-color: rgb(118, 118, 118);
   border-radius: 10px; /*arredonda as bordas*/
   padding: 15px; /*Epaçamento interno*/
   width: 500px; /*Largura*/
   margin: auto; /*Centraliza o elemento*/
+  box-shadow: 5px 5px 10px black;
 }
 
 article#chatBox {
-  background-color: white; /*Cor de fundo*/
+  background-color: #121212; /*Cor de fundo*/
   width: 100%; /*Largura*/
   border-radius: 10px; /*arredonda as bordas*/
   text-align: left; /*Alinha o texto a esquerda*/
   overflow-y: auto; /*Permite rolar a caixa de chat*/
   color: #121212; /*Cor do texto*/
-  border: 1px solid #ccc; /*Borda*/
+  border: 2px solid white; /*Borda*/
   height: 400px; /*Altura*/
   scroll-behavior: smooth;
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
 article#chatBox p {
-  color: black;
+  color: whitesmoke;
   padding-left: 10px;
   padding-right: 10px;
   font-size: 12.5px;
@@ -52,8 +52,15 @@ div#inputBox {
   gap: 10px;
 }
 
+textarea#mensagem {
+  color: whitesmoke;
+  background-color: #121212;
+}
+
 button#enviar {
   cursor: pointer;
+  color: whitesmoke;
+  background-color: #121212;
 }
 
 footer {
