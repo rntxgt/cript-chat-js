@@ -28,7 +28,10 @@ socket.onmessage = async (message) => {
   if (Notification.permission === "granted" && document.hidden) {
     new Notification("Nova mensagem no Cript-Chat", {
       body: msg.replace("<b>", "").replace("</b>", ""),
-    });
+    }).onclick = function () {
+      document.getElementById("mensagem").focus();
+      this.close();
+    };
   }
 };
 
