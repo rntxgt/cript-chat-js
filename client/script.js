@@ -1,19 +1,21 @@
 const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
 let key = prompt("Insira a chave: ");
-key += "2yCH5xqdCU7ja0dE";
-const iv = window.crypto.getRandomValues(new Uint8Array(12));
+let keyEncrypted;
+cryptoKey();
 
-if (!nome || !key) {
-  alert("[ERRO] Nome ou chave inválidos!");
+if (!nome || !key || !localIp) {
+  alert("[ERRO] Nome, chave ou IP inválidos!");
   location.reload();
 }
+
+key += "2yCH5xqdCU7ja0dE";
 
 if (window.Notification && Notification.permission === "default") {
   Notification.requestPermission();
 }
 
-const socket = new WebSocket(`ws://${localIp}:8080`);
+socket = new WebSocket(`ws://${localIp}:8080`);
 socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
@@ -66,35 +68,42 @@ function writeChatBox(messageChatBox) {
     document.getElementById("chatBox").scrollHeight;
 }
 
-// gera hash da chave
-async function hash() {
-  return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
-}
-
-// gera a chave
+// gera o hash e a chave
 async function cryptoKey() {
-  return await crypto.subtle.importKey("raw", await hash(), "AES-GCM", false, [
-    "encrypt",
-    "decrypt",
-  ]);
+  keyEncrypted = await crypto.subtle.importKey(
+    "raw",
+    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)),
+    "AES-GCM",
+    false,
+    ["encrypt", "decrypt"],
+  );
 }
 
 // criptografa a mensagem
 async function encrypt(msg) {
-  return await crypto.subtle.encrypt(
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
-    await cryptoKey(),
+    keyEncrypted,
     new TextEncoder().encode(msg),
   );
+
+  const packet = new Uint8Array(iv.length + encrypted.byteLength);
+  packet.set(iv);
+  packet.set(new Uint8Array(encrypted), iv.length);
+
+  return packet;
 }
 
 // descriptografa a mensagem
-async function decrypt(msg) {
+async function decrypt(pack) {
+  const buffer = new Uint8Array(pack);
+
   return new TextDecoder().decode(
     await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
-      await cryptoKey(),
-      msg,
+      { name: "AES-GCM", iv: buffer.subarray(0, 12) },
+      keyEncrypted,
+      buffer.subarray(12),
     ),
   );
 }
