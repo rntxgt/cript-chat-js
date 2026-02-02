@@ -3,7 +3,7 @@ O **Cript-Chat** é uma aplicação de mensagens em tempo real focada em privaci
 ## Funcionalidades:
 - **Mensageria Instantânea:** Comunicação fluida via WebSockets.
 - **Interface Limpa:** Foco na experiência do usuário e na velocidade.
-- **Criptografia:** Criptografia E2EE, servidor é apenas um mensaggeiro. Os próprios clients gerenciam o envio do nome e mensagens de desconexão. Foi utilizado o padrão `AES-GCM` com uma chave de `256 bits`.
+- **Criptografia:** Criptografia E2EE, os próprios clients gerenciam o envio do nome e mensagens de desconexão. Foi utilizado o padrão `AES-GCM` com uma chave de `256 bits`.
 - **Zero informação ao servidor**: O servidor funciona apenas como um mensageiro, mas não tem informações diretas ao conteúdo das mensagens.
 
 ## Tecnologias Utilizadas
