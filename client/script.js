@@ -2,6 +2,9 @@ const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
 let key = prompt("Insira a chave: ");
 let keyEncrypted;
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 cryptoKey();
 
 if (!nome || !key || !localIp) {
@@ -20,16 +23,25 @@ socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
   writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  socket.send(await encrypt(JSON.stringify({ u: null, m: `${nome} entrou` })));
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  const decrypted = await decrypt(message.data);
+  let data;
+  try {
+    data = JSON.parse(decrypted);
+  } catch (e) {
+    // Fallback for old clients or malformed data
+    data = { u: null, m: decrypted };
+  }
+
+  const { u, m } = data;
+  writeChatBox(m, u);
 
   if (Notification.permission === "granted" && document.hidden) {
     new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
+      body: u ? `${u}: ${m}` : m,
     }).onclick = function () {
       document.getElementById("mensagem").focus();
       this.close();
@@ -43,36 +55,38 @@ socket.onclose = () =>
   );
 
 async function sendMessage() {
-  if (
-    document.getElementById("mensagem").value == "" ||
-    document.getElementById("mensagem").value.length >= 500
-  ) {
+  const msgInput = document.getElementById("mensagem");
+  const msgValue = msgInput.value;
+
+  if (msgValue == "" || msgValue.length >= 500) {
     alert("[ERRO] Digite uma mensagem válida!");
-    document.getElementById("mensagem").focus();
+    msgInput.focus();
   } else {
-    socket.send(
-      await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
-      ),
-    );
-    document.getElementById("mensagem").value = "";
-    document.getElementById("mensagem").focus();
+    socket.send(await encrypt(JSON.stringify({ u: nome, m: msgValue })));
+    msgInput.value = "";
+    msgInput.focus();
   }
 }
 
-function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
-  document.getElementById("chatBox").scrollTop =
-    document.getElementById("chatBox").scrollHeight;
+function writeChatBox(message, user = null) {
+  const p = document.createElement("p");
+  if (user) {
+    const b = document.createElement("b");
+    b.textContent = user + ": ";
+    p.appendChild(b);
+  }
+  p.appendChild(document.createTextNode(message));
+
+  const chatBox = document.getElementById("chatBox");
+  chatBox.appendChild(p);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 // gera o hash e a chave
 async function cryptoKey() {
   keyEncrypted = await crypto.subtle.importKey(
     "raw",
-    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)),
+    await crypto.subtle.digest("SHA-256", encoder.encode(key)),
     "AES-GCM",
     false,
     ["encrypt", "decrypt"],
@@ -85,7 +99,7 @@ async function encrypt(msg) {
   const encrypted = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     keyEncrypted,
-    new TextEncoder().encode(msg),
+    encoder.encode(msg),
   );
 
   const packet = new Uint8Array(iv.length + encrypted.byteLength);
@@ -99,7 +113,7 @@ async function encrypt(msg) {
 async function decrypt(pack) {
   const buffer = new Uint8Array(pack);
 
-  return new TextDecoder().decode(
+  return decoder.decode(
     await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: buffer.subarray(0, 12) },
       keyEncrypted,
