@@ -20,16 +20,30 @@ socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
   writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  socket.send(
+    await encrypt(JSON.stringify({ type: "system", text: `${nome} entrou` })),
+  );
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  const decrypted = await decrypt(message.data);
+  writeChatBox(decrypted);
 
   if (Notification.permission === "granted" && document.hidden) {
+    let notificationBody = decrypted;
+    try {
+      const data = JSON.parse(decrypted);
+      if (data.type === "chat") {
+        notificationBody = `${data.user}: ${data.text}`;
+      } else if (data.type === "system") {
+        notificationBody = data.text;
+      }
+    } catch (e) {
+      notificationBody = decrypted.replace(/<[^>]*>?/gm, "");
+    }
+
     new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
+      body: notificationBody,
     }).onclick = function () {
       document.getElementById("mensagem").focus();
       this.close();
@@ -50,20 +64,39 @@ async function sendMessage() {
     alert("[ERRO] Digite uma mensagem válida!");
     document.getElementById("mensagem").focus();
   } else {
-    socket.send(
-      await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
-      ),
-    );
+    const payload = JSON.stringify({
+      type: "chat",
+      user: nome,
+      text: document.getElementById("mensagem").value,
+    });
+    socket.send(await encrypt(payload));
     document.getElementById("mensagem").value = "";
     document.getElementById("mensagem").focus();
   }
 }
 
 function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
+  const p = document.createElement("p");
+  try {
+    const data = JSON.parse(messageChatBox);
+    if (data.type === "chat") {
+      const userBold = document.createElement("strong");
+      userBold.textContent = data.user + ": ";
+      p.appendChild(userBold);
+      const textSpan = document.createElement("span");
+      textSpan.textContent = data.text;
+      p.appendChild(textSpan);
+    } else if (data.type === "system") {
+      const systemEm = document.createElement("em");
+      systemEm.textContent = data.text;
+      p.appendChild(systemEm);
+    } else {
+      p.textContent = messageChatBox;
+    }
+  } catch (e) {
+    p.textContent = messageChatBox;
+  }
+  document.getElementById("chatBox").appendChild(p);
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 }
