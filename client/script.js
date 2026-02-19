@@ -2,7 +2,6 @@ const localIp = prompt("Insira o IP do servidor: ");
 const nome = prompt("Insira seu nome: ");
 let key = prompt("Insira a chave: ");
 let keyEncrypted;
-cryptoKey();
 
 if (!nome || !key || !localIp) {
   alert("[ERRO] Nome, chave ou IP inválidos!");
@@ -10,6 +9,7 @@ if (!nome || !key || !localIp) {
 }
 
 key += "2yCH5xqdCU7ja0dE";
+cryptoKey();
 
 if (window.Notification && Notification.permission === "default") {
   Notification.requestPermission();
