@@ -20,16 +20,37 @@ socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
   writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  socket.send(
+    await encrypt(
+      JSON.stringify({ type: "system", text: `${nome} entrou` }),
+    ),
+  );
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  const decrypted = await decrypt(message.data);
+  let msgContent = "";
+
+  try {
+    const data = JSON.parse(decrypted);
+    if (data.type === "message") {
+      appendMessage(data.user, data.text);
+      msgContent = `${data.user}: ${data.text}`;
+    } else if (data.type === "system") {
+      writeChatBox(data.text);
+      msgContent = data.text;
+    } else {
+      writeChatBox(decrypted);
+      msgContent = decrypted;
+    }
+  } catch (e) {
+    writeChatBox(decrypted);
+    msgContent = decrypted;
+  }
 
   if (Notification.permission === "granted" && document.hidden) {
     new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
+      body: msgContent,
     }).onclick = function () {
       document.getElementById("mensagem").focus();
       this.close();
@@ -52,7 +73,11 @@ async function sendMessage() {
   } else {
     socket.send(
       await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+        JSON.stringify({
+          type: "message",
+          user: nome,
+          text: document.getElementById("mensagem").value,
+        }),
       ),
     );
     document.getElementById("mensagem").value = "";
@@ -60,10 +85,21 @@ async function sendMessage() {
   }
 }
 
-function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
+function writeChatBox(message) {
+  const p = document.createElement("p");
+  p.textContent = message;
+  document.getElementById("chatBox").appendChild(p);
+  document.getElementById("chatBox").scrollTop =
+    document.getElementById("chatBox").scrollHeight;
+}
+
+function appendMessage(user, message) {
+  const p = document.createElement("p");
+  const b = document.createElement("b");
+  b.textContent = user + ": ";
+  p.appendChild(b);
+  p.appendChild(document.createTextNode(message));
+  document.getElementById("chatBox").appendChild(p);
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 }
