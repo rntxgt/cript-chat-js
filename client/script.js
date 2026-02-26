@@ -19,26 +19,56 @@ socket = new WebSocket(`ws://${localIp}:8080`);
 socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
-  writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  appendLog("Bem-vindo ao Cript-Chat!");
+  socket.send(
+    await encrypt(
+      JSON.stringify({
+        type: "system",
+        text: `${nome} entrou`,
+      }),
+    ),
+  );
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  const decrypted = await decrypt(message.data);
+  let data;
 
-  if (Notification.permission === "granted" && document.hidden) {
-    new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
-    }).onclick = function () {
-      document.getElementById("mensagem").focus();
-      this.close();
-    };
+  try {
+    data = JSON.parse(decrypted);
+  } catch (e) {
+    appendLog(decrypted);
+    return;
+  }
+
+  if (data.type === "message") {
+    appendUserMessage(data.user, data.text);
+
+    if (Notification.permission === "granted" && document.hidden) {
+      new Notification("Nova mensagem no Cript-Chat", {
+        body: `${data.user}: ${data.text}`,
+      }).onclick = function () {
+        document.getElementById("mensagem").focus();
+        this.close();
+      };
+    }
+  } else if (data.type === "system") {
+    appendLog(data.text);
+    if (Notification.permission === "granted" && document.hidden) {
+      new Notification("Nova mensagem no Cript-Chat", {
+        body: data.text,
+      }).onclick = function () {
+        document.getElementById("mensagem").focus();
+        this.close();
+      };
+    }
+  } else {
+    appendLog(decrypted);
   }
 };
 
 socket.onclose = () =>
-  writeChatBox(
+  appendLog(
     `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
   );
 
@@ -52,7 +82,11 @@ async function sendMessage() {
   } else {
     socket.send(
       await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+        JSON.stringify({
+          type: "message",
+          user: nome,
+          text: document.getElementById("mensagem").value,
+        }),
       ),
     );
     document.getElementById("mensagem").value = "";
@@ -60,10 +94,21 @@ async function sendMessage() {
   }
 }
 
-function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
+function appendLog(text) {
+  const p = document.createElement("p");
+  p.textContent = text;
+  document.getElementById("chatBox").appendChild(p);
+  document.getElementById("chatBox").scrollTop =
+    document.getElementById("chatBox").scrollHeight;
+}
+
+function appendUserMessage(user, text) {
+  const p = document.createElement("p");
+  const b = document.createElement("b");
+  b.textContent = user + ": ";
+  p.appendChild(b);
+  p.appendChild(document.createTextNode(text));
+  document.getElementById("chatBox").appendChild(p);
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 }
