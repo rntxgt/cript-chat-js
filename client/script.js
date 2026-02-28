@@ -15,57 +15,83 @@ if (window.Notification && Notification.permission === "default") {
   Notification.requestPermission();
 }
 
+const chatBoxElement = document.getElementById("chatBox");
+const mensagemElement = document.getElementById("mensagem");
+
 socket = new WebSocket(`ws://${localIp}:8080`);
 socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
-  writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  writeChatBox({ type: "system", text: "Bem-vindo ao Cript-Chat!" });
+  socket.send(await encrypt(JSON.stringify({ type: "system", text: `${nome} entrou` })));
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  let msgData;
+  try {
+    const decrypted = await decrypt(message.data);
+    msgData = JSON.parse(decrypted);
+  } catch (e) {
+    return; // Ignore invalid or malformed messages
+  }
+
+  writeChatBox(msgData);
 
   if (Notification.permission === "granted" && document.hidden) {
+    let notifyText = "";
+    if (msgData.type === "message") {
+      notifyText = `${msgData.user}: ${msgData.text}`;
+    } else if (msgData.type === "system") {
+      notifyText = msgData.text;
+    }
+
     new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
+      body: notifyText,
     }).onclick = function () {
-      document.getElementById("mensagem").focus();
+      mensagemElement.focus();
       this.close();
     };
   }
 };
 
 socket.onclose = () =>
-  writeChatBox(
-    `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
-  );
+  writeChatBox({
+    type: "system",
+    text: `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
+  });
 
 async function sendMessage() {
-  if (
-    document.getElementById("mensagem").value == "" ||
-    document.getElementById("mensagem").value.length >= 500
-  ) {
+  const msgValue = mensagemElement.value;
+  if (msgValue == "" || msgValue.length >= 500) {
     alert("[ERRO] Digite uma mensagem válida!");
-    document.getElementById("mensagem").focus();
+    mensagemElement.focus();
   } else {
     socket.send(
       await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
+        JSON.stringify({ type: "message", user: nome, text: msgValue })
       ),
     );
-    document.getElementById("mensagem").value = "";
-    document.getElementById("mensagem").focus();
+    mensagemElement.value = "";
+    mensagemElement.focus();
   }
 }
 
-function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
-  document.getElementById("chatBox").scrollTop =
-    document.getElementById("chatBox").scrollHeight;
+function writeChatBox(msgData) {
+  const p = document.createElement("p");
+
+  if (msgData.type === "message") {
+    const b = document.createElement("b");
+    b.textContent = `${msgData.user}: `;
+    p.appendChild(b);
+    p.appendChild(document.createTextNode(msgData.text));
+  } else if (msgData.type === "system") {
+    p.textContent = msgData.text;
+  } else {
+    return; // Unknown message type
+  }
+
+  chatBoxElement.appendChild(p);
+  chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
 }
 
 // gera o hash e a chave
