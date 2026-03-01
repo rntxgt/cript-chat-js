@@ -1,0 +1,4 @@
+## 2025-03-01 - DOM-based XSS via .innerHTML and String Concatenation
+**Vulnerability:** The application was vulnerable to Stored/Reflected Cross-Site Scripting (XSS) because messages were constructed by concatenating raw strings with HTML tags (e.g., `"<b>" + nome + ": </b>" + msg`) and then rendered directly to the DOM using `.innerHTML`.
+**Learning:** Even in an E2E encrypted architecture where the server cannot read messages, vulnerabilities can still exist on the client side if the decrypted payloads are not properly sanitized or if the transport data structure relies on raw HTML.
+**Prevention:** Always serialize message payloads using a structured format like JSON (`JSON.stringify({ type: 'message', user: '...', text: '...' })`). When rendering user content to the DOM, avoid `.innerHTML` and instead use secure APIs like `document.createElement`, `.textContent`, and `document.createTextNode`.
