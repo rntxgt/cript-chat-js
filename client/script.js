@@ -19,17 +19,27 @@ socket = new WebSocket(`ws://${localIp}:8080`);
 socket.binaryType = "arraybuffer";
 
 socket.onopen = async () => {
-  writeChatBox("Bem-vindo ao Cript-Chat!");
-  socket.send(await encrypt(`${nome} entrou`));
+  writeChatBox({ type: 'system', text: "Bem-vindo ao Cript-Chat!" });
+  const payload = JSON.stringify({ type: 'system', text: `${nome} entrou` });
+  socket.send(await encrypt(payload));
 };
 
 socket.onmessage = async (message) => {
-  let msg;
-  writeChatBox((msg = await decrypt(message.data)));
+  let msgObj;
+  try {
+    const decrypted = await decrypt(message.data);
+    msgObj = JSON.parse(decrypted);
+  } catch (e) {
+    console.error("Failed to parse message", e);
+    return;
+  }
+
+  writeChatBox(msgObj);
 
   if (Notification.permission === "granted" && document.hidden) {
+    let notifyText = msgObj.type === 'message' ? `${msgObj.user}: ${msgObj.text}` : msgObj.text;
     new Notification("Nova mensagem no Cript-Chat", {
-      body: msg.replace("<b>", "").replace("</b>", ""),
+      body: notifyText,
     }).onclick = function () {
       document.getElementById("mensagem").focus();
       this.close();
@@ -38,9 +48,10 @@ socket.onmessage = async (message) => {
 };
 
 socket.onclose = () =>
-  writeChatBox(
-    `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`,
-  );
+  writeChatBox({
+    type: 'system',
+    text: `Conexão com o servidor perdida. Por favor, tente novamente mais tarde`
+  });
 
 async function sendMessage() {
   if (
@@ -50,20 +61,33 @@ async function sendMessage() {
     alert("[ERRO] Digite uma mensagem válida!");
     document.getElementById("mensagem").focus();
   } else {
-    socket.send(
-      await encrypt(
-        "<b>" + nome + ": </b>" + document.getElementById("mensagem").value,
-      ),
-    );
+    const payload = JSON.stringify({
+      type: 'message',
+      user: nome,
+      text: document.getElementById("mensagem").value
+    });
+    socket.send(await encrypt(payload));
     document.getElementById("mensagem").value = "";
     document.getElementById("mensagem").focus();
   }
 }
 
-function writeChatBox(messageChatBox) {
-  document
-    .getElementById("chatBox")
-    .appendChild(document.createElement("p")).innerHTML = messageChatBox;
+function writeChatBox(msgObj) {
+  const p = document.createElement("p");
+
+  if (msgObj.type === 'message') {
+    const b = document.createElement("b");
+    b.textContent = msgObj.user + ": ";
+    p.appendChild(b);
+    p.appendChild(document.createTextNode(msgObj.text));
+  } else if (msgObj.type === 'system') {
+    p.textContent = msgObj.text;
+  } else {
+    // Falback for plain text or older string formats
+    p.textContent = typeof msgObj === 'string' ? msgObj : msgObj.text || '';
+  }
+
+  document.getElementById("chatBox").appendChild(p);
   document.getElementById("chatBox").scrollTop =
     document.getElementById("chatBox").scrollHeight;
 }
