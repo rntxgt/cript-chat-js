@@ -1,0 +1,4 @@
+## 2024-05-24 - [CRITICAL] Prevent XSS via WebSocket by using structured data
+**Vulnerability:** The application was vulnerable to severe Cross-Site Scripting (XSS) because it received raw, HTML-formatted strings over WebSockets and directly injected them into the DOM using `.innerHTML`.
+**Learning:** Even if data is transmitted securely (e.g., encrypted via Web Crypto API), the content of the data must still be treated as untrusted user input. Sending HTML tags like `<b>` over the wire encourages clients to use unsafe DOM insertion methods.
+**Prevention:** Always transmit structured data (like JSON) over WebSockets instead of pre-formatted HTML. In the client, parse this structured data and strictly use safe DOM manipulation methods like `document.createElement()` and `.textContent` to render user input.
