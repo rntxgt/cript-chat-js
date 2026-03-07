@@ -1,0 +1,4 @@
+## 2024-05-14 - DOM-based XSS via innerHTML and Unstructured Messages
+**Vulnerability:** The application was using `innerHTML` to directly render unescaped text received from WebSockets. Additionally, the WebSocket messages were unstructured strings where the username and the content were concatenated using `<b>...</b>`. This allowed anyone to inject malicious HTML or scripts.
+**Learning:** Sending unstructured strings with inline HTML tags over the network is dangerous and forces the client to use unsafe parsing like `innerHTML`. The combination of both makes the client highly vulnerable to DOM-based XSS.
+**Prevention:** 1. Structure WebSocket communications using a strictly typed JSON structure (e.g., `{ type: "message", user: "...", text: "..." }`). 2. Use `JSON.parse` securely on the client side. 3. Enforce the use of `textContent` and `createElement` in the DOM manipulation logic to render received content safely, eliminating the need for `innerHTML`.
