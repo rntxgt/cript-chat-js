@@ -1,0 +1,4 @@
+## 2024-05-24 - [Fix XSS Vulnerability in Chat Output]
+**Vulnerability:** The client code directly inserted user-provided text into the DOM via `.innerHTML` without proper sanitization (e.g., `document.getElementById("chatBox").appendChild(document.createElement("p")).innerHTML = messageChatBox;`). This allowed malicious users to execute arbitrary JavaScript code (XSS).
+**Learning:** Even if data goes through encryption layers, if the output isn't safely injected into the DOM upon decryption, the application remains vulnerable to injection attacks.
+**Prevention:** Always use safe DOM manipulation methods such as `.textContent` or `document.createTextNode` instead of `.innerHTML` when handling user input. Additionally, establishing a strict JSON structure for inter-client communication helps separate data from representation logic.
